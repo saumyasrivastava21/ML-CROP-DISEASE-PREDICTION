@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crop Disease Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      padding: 30px;
+      text-align: center;
+    }
+    .card {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+    }
+    input, select {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    #preview {
+      margin-top: 15px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🌱 Crop Disease Prediction</h2>
+    <form id="uploadForm">
+      <label for="crop">Select Crop:</label>
+      <select name="crop" id="crop">
+        <option value="rice">Rice</option>
+        <option value="banana">Banana</option>
+        <option value="plant">Plant</option>
+      </select>
+      
+      <label for="file">Upload Image:</label>
+      <input type="file" id="file" name="file" accept="image/*" required />
+      <img id="preview" src="" alt="Preview" style="display:none;" />
+      
+      <button type="submit">Predict</button>
+    </form>
+    
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const preview = document.getElementById("preview");
+    const resultDiv = document.getElementById("result");
+
+    // Show image preview
+    document.getElementById("file").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Handle form submit
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData();
+      formData.append("crop", document.getElementById("crop").value);
+      formData.append("file", document.getElementById("file").files[0]);
+
+      resultDiv.innerHTML = "<p>⏳ Predicting... please wait.</p>";
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/predict", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || "Server Error");
+        }
+
+        const data = await response.json();
+        resultDiv.innerHTML = `
+          <h3>✅ Prediction Result</h3>
+          <p><b>Crop:</b> ${data.crop}</p>
+          <p><b>Predicted Disease:</b> ${data.predicted_disease}</p>
+          <p><b>Confidence:</b> ${(data.confidence * 100).toFixed(2)}%</p>
+          <p><b>Model Used:</b> ${data.model_used}</p>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = `<p style="color:red;">❌ Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

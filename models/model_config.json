@@ -1,0 +1,17 @@
+{
+  "plant": {
+    "path": "models/plant_disease_model.keras",
+    "labels": "models/labels/plant_labels.json",
+    "target_size": [224, 224]
+  },
+  "rice": {
+    "path": "models/final_rice_model (1).keras",
+    "labels": "models/labels/rice_labels.json",
+    "target_size": [224, 224]
+  },
+  "banana": {
+    "path": "models/my_cnn_model.keras",
+    "labels": "models/labels/banana_labels.json",
+    "target_size": [224, 224]
+  }
+}
